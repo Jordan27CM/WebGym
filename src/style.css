@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #caff00; /* Neon gym style */
+  --bg-dark: #0f172a;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
