@@ -91,7 +91,7 @@ const handlePurchase = async (plan) => {
     }
     
     if (currentUser) {
-      await updateUserPlan(currentUser.uid, plan.id, plan.name)
+      await updateUserPlan(currentUser.uid, currentUser.displayName || 'Atleta', plan.id, plan.name)
       router.push('/panel')
     }
   } catch (error) {

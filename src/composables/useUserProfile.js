@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { db } from '../firebase/config'
-import { ref as dbRef, set, onValue } from 'firebase/database'
+import { ref as dbRef, update, onValue } from 'firebase/database'
 
 export function useUserProfile() {
   const userProfile = ref(null)
@@ -8,11 +8,12 @@ export function useUserProfile() {
   const error = ref(null)
 
   // Asignar o actualizar el plan del usuario
-  const updateUserPlan = async (userId, planId, planName) => {
+  const updateUserPlan = async (userId, userName, planId, planName) => {
     try {
       loading.value = true
       const userRef = dbRef(db, `users/${userId}`)
-      await set(userRef, {
+      await update(userRef, {
+        displayName: userName,
         activePlanId: planId,
         activePlanName: planName,
         updatedAt: Date.now()

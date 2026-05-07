@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto">
-      <div class="bg-slate-800 rounded-2xl p-8 mb-8 border border-slate-700">
-        <h1 class="text-3xl font-bold text-white mb-2">Panel de Administración</h1>
-        <p class="text-slate-400">Gestiona los entrenadores y los planes de suscripción.</p>
+      <div class="bg-slate-800 rounded-2xl p-5 md:p-8 mb-6 md:mb-8 border border-slate-700">
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Panel de Administración</h1>
+        <p class="text-sm md:text-base text-slate-400">Gestiona los entrenadores y los planes de suscripción.</p>
       </div>
 
       <!-- SECCIÓN ENTRENADORES -->
-      <h2 class="text-2xl font-bold text-lime-400 mb-6 border-b border-slate-700 pb-2">Gestión de Entrenadores</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <h2 class="text-xl md:text-2xl font-bold text-lime-400 mb-6 border-b border-slate-700 pb-2">Gestión de Entrenadores</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-10 md:mb-12">
         <!-- Formulario para agregar entrenador -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-fit">
-          <h3 class="text-xl font-bold text-white mb-6">Agregar Entrenador</h3>
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700 h-fit">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6">Agregar Entrenador</h3>
           
           <form @submit.prevent="handleAddTrainer" class="flex flex-col gap-4">
             <div>
@@ -55,8 +55,8 @@
         </div>
 
         <!-- Lista de Entrenadores -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700">
-          <h3 class="text-xl font-bold text-white mb-6">Entrenadores Registrados</h3>
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6">Entrenadores Registrados</h3>
           
           <div v-if="loadingTrainers" class="text-slate-400 text-center py-8">Cargando...</div>
           <div v-else-if="trainers.length === 0" class="text-slate-400 text-center py-8 bg-slate-900/50 rounded-lg border border-slate-700 border-dashed">
@@ -86,11 +86,11 @@
       </div>
 
       <!-- SECCIÓN PLANES -->
-      <h2 class="text-2xl font-bold text-lime-400 mb-6 border-b border-slate-700 pb-2">Gestión de Planes</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <h2 class="text-xl md:text-2xl font-bold text-lime-400 mb-6 border-b border-slate-700 pb-2 mt-8 md:mt-12">Gestión de Planes</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <!-- Formulario para agregar plan -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-fit">
-          <h3 class="text-xl font-bold text-white mb-6">Agregar Plan</h3>
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700 h-fit">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6">Agregar Plan</h3>
           
           <form @submit.prevent="handleAddPlan" class="flex flex-col gap-4">
             <div>
@@ -133,8 +133,8 @@
         </div>
 
         <!-- Lista de Planes -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700">
-          <h3 class="text-xl font-bold text-white mb-6">Planes Registrados</h3>
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6">Planes Registrados</h3>
           
           <div v-if="loadingPlans" class="text-slate-400 text-center py-8">Cargando...</div>
           <div v-else-if="plans.length === 0" class="text-slate-400 text-center py-8 bg-slate-900/50 rounded-lg border border-slate-700 border-dashed">
@@ -170,102 +170,265 @@
         </div>
       </div>
 
+      <!-- SECCIÓN ASISTENCIA -->
+      <h2 class="text-xl md:text-2xl font-bold text-lime-400 mb-6 border-b border-slate-700 pb-2 mt-10 md:mt-12">Control de Asistencia</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-10 md:mb-12">
+        <!-- Escáner QR -->
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
+            Escáner de Asistencia
+          </h3>
+          <div v-if="!scannerActive" class="text-center">
+            <button @click="startScanner" class="bg-lime-400 text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-lime-500 transition-colors w-full">Activar Cámara</button>
+          </div>
+          <div v-else>
+            <div id="qr-reader" class="rounded-xl overflow-hidden mb-4"></div>
+            <button @click="stopScanner" class="w-full bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-600 transition-colors text-sm">Detener Cámara</button>
+          </div>
+          <!-- Feedback -->
+          <div v-if="scanLoading" class="mt-4 text-slate-400 text-center text-sm">Procesando...</div>
+        </div>
+
+        <!-- Registro del Día -->
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700">
+          <h3 class="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>
+            Registro de Hoy
+          </h3>
+          <div class="bg-slate-900 px-4 py-2 rounded-lg border border-slate-700 mb-4 text-center">
+            <span class="text-lime-400 font-bold">{{ todayRecords.length }}</span>
+            <span class="text-slate-400 text-sm ml-2">registros hoy</span>
+          </div>
+          <div v-if="todayRecords.length === 0" class="text-slate-500 text-center py-6 bg-slate-900/50 rounded-lg border border-slate-700 border-dashed text-sm">Sin registros hoy.</div>
+          <div v-else class="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div v-for="rec in todayRecords" :key="rec.id" class="bg-slate-900 p-3 rounded-xl border border-slate-700 flex items-center justify-between text-sm">
+              <div>
+                <div class="font-semibold text-white">{{ rec.userName || rec.userId }}</div>
+                <div class="text-xs text-slate-400 mt-0.5">{{ formatTimestamp(rec.checkIn) }} → {{ rec.checkOut ? formatTimestamp(rec.checkOut) : '...' }}</div>
+              </div>
+              <div class="text-xs font-bold px-2 py-1 rounded" :class="rec.checkOut ? 'bg-blue-400/10 text-blue-400' : 'bg-lime-400/10 text-lime-400'">{{ rec.checkOut ? (rec.duration + ' min') : '🟢 Dentro' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL DE AVISO QR -->
+      <div v-if="scanFeedbackModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-800 border-2 rounded-3xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all"
+             :class="scanFeedbackType === 'in' ? 'border-lime-400 shadow-lime-400/20' : scanFeedbackType === 'out' ? 'border-blue-400 shadow-blue-400/20' : 'border-red-400 shadow-red-400/20'">
+          
+          <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6"
+               :class="scanFeedbackType === 'in' ? 'bg-lime-400/20 text-lime-400' : scanFeedbackType === 'out' ? 'bg-blue-400/20 text-blue-400' : 'bg-red-400/20 text-red-400'">
+            <!-- Icono Entrada -->
+            <svg v-if="scanFeedbackType === 'in'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <!-- Icono Salida -->
+            <svg v-else-if="scanFeedbackType === 'out'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            <!-- Icono Error -->
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+          </div>
+          
+          <h2 class="text-3xl font-black text-white mb-2 uppercase tracking-wide">
+            {{ scanFeedbackType === 'in' ? '¡Entrada!' : scanFeedbackType === 'out' ? '¡Salida!' : 'Error' }}
+          </h2>
+          
+          <p class="text-lg text-slate-300 font-medium mb-8">
+            {{ scanFeedbackMessage }}
+          </p>
+          
+          <button @click="closeScanModal" class="w-full py-4 rounded-xl font-bold transition-colors text-lg"
+                  :class="scanFeedbackType === 'in' ? 'bg-lime-400 hover:bg-lime-500 text-slate-900' : scanFeedbackType === 'out' ? 'bg-blue-400 hover:bg-blue-500 text-slate-900' : 'bg-red-500 hover:bg-red-600 text-white'">
+            Continuar
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useTrainers } from '../composables/useTrainers'
 import { usePlans } from '../composables/usePlans'
+import { useAttendance } from '../composables/useAttendance'
+import { parseQRValue } from '../utils/dynamicQR'
+import { db } from '../firebase/config'
+import { ref as dbRef, get } from 'firebase/database'
 
-// Utilidad para CLP
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    minimumFractionDigits: 0
-  }).format(price)
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(price)
+}
+
+const formatTimestamp = (ts) => {
+  if (!ts) return ''
+  return new Date(ts).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
 }
 
 // --- ENTRENADORES ---
 const { addTrainer, deleteTrainer, fetchTrainers, trainers, loading: loadingTrainers } = useTrainers()
-
-const newTrainer = ref({
-  name: '',
-  specialty: '',
-  photoUrl: '',
-  startTime: '08:00',
-  endTime: '18:00',
-  sessionPrice: ''
-})
-
+const newTrainer = ref({ name: '', specialty: '', photoUrl: '', startTime: '08:00', endTime: '18:00', sessionPrice: '' })
 const loadingTrainer = ref(false)
 const successMsgTrainer = ref('')
 const errorMsgTrainer = ref('')
 
 const handleAddTrainer = async () => {
-  loadingTrainer.value = true
-  successMsgTrainer.value = ''
-  errorMsgTrainer.value = ''
+  loadingTrainer.value = true; successMsgTrainer.value = ''; errorMsgTrainer.value = ''
   try {
     await addTrainer(newTrainer.value)
     successMsgTrainer.value = 'Guardado exitosamente.'
     newTrainer.value = { name: '', specialty: '', photoUrl: '', startTime: '08:00', endTime: '18:00', sessionPrice: '' }
-  } catch (error) {
-    errorMsgTrainer.value = 'Ocurrió un error.'
-  } finally {
-    loadingTrainer.value = false
-  }
+  } catch (error) { errorMsgTrainer.value = 'Ocurrió un error.' }
+  finally { loadingTrainer.value = false }
 }
 
 const handleDeleteTrainer = async (id) => {
-  if(confirm('¿Seguro que deseas eliminar este entrenador?')) {
-    await deleteTrainer(id)
-  }
+  if (confirm('¿Seguro que deseas eliminar este entrenador?')) await deleteTrainer(id)
 }
 
 // --- PLANES ---
 const { addPlan, deletePlan, fetchPlans, plans, loading: loadingPlans } = usePlans()
-
-const newPlan = ref({
-  name: '',
-  price: '',
-  period: 'mes',
-  description: '',
-  features: '',
-  isPopular: false
-})
-
+const newPlan = ref({ name: '', price: '', period: 'mes', description: '', features: '', isPopular: false })
 const loadingPlan = ref(false)
 const successMsgPlan = ref('')
 const errorMsgPlan = ref('')
 
 const handleAddPlan = async () => {
-  loadingPlan.value = true
-  successMsgPlan.value = ''
-  errorMsgPlan.value = ''
+  loadingPlan.value = true; successMsgPlan.value = ''; errorMsgPlan.value = ''
   try {
     await addPlan(newPlan.value)
     successMsgPlan.value = 'Plan guardado exitosamente.'
     newPlan.value = { name: '', price: '', period: 'mes', description: '', features: '', isPopular: false }
-  } catch (error) {
-    errorMsgPlan.value = 'Ocurrió un error.'
-  } finally {
-    loadingPlan.value = false
-  }
+  } catch (error) { errorMsgPlan.value = 'Ocurrió un error.' }
+  finally { loadingPlan.value = false }
 }
 
 const handleDeletePlan = async (id) => {
-  if(confirm('¿Seguro que deseas eliminar este plan?')) {
-    await deletePlan(id)
+  if (confirm('¿Seguro que deseas eliminar este plan?')) await deletePlan(id)
+}
+
+// --- ASISTENCIA ---
+const { checkIn, checkOut, findActiveSession, fetchAllAttendanceForDate, formatDuration } = useAttendance()
+const scannerActive = ref(false)
+const scanFeedbackModal = ref(false)
+const scanFeedbackMessage = ref('')
+const scanFeedbackType = ref('')
+const scanLoading = ref(false)
+const todayRecords = ref([])
+let html5QrCode = null
+let scanCooldown = false
+let modalTimeout = null
+
+const loadTodayRecords = async () => {
+  const today = new Date().toISOString().split('T')[0]
+  todayRecords.value = await fetchAllAttendanceForDate(today)
+}
+
+const getUserName = async (userId) => {
+  try {
+    const userRef = dbRef(db, `users/${userId}`)
+    const snap = await get(userRef)
+    if (snap.exists()) return snap.val().displayName || snap.val().activePlanName || userId.slice(0, 8)
+    return userId.slice(0, 8)
+  } catch { return userId.slice(0, 8) }
+}
+
+const closeScanModal = () => {
+  scanFeedbackModal.value = false
+  if (modalTimeout) clearTimeout(modalTimeout)
+  // Pequeño retardo extra para no escanear accidentalmente al instante de cerrar
+  setTimeout(() => { scanCooldown = false }, 500)
+}
+
+const handleScanSuccess = async (decodedText) => {
+  if (scanCooldown || scanLoading.value || scanFeedbackModal.value) return
+  scanCooldown = true
+  scanLoading.value = true
+
+  try {
+    const parsed = parseQRValue(decodedText.trim())
+
+    if (!parsed) {
+      scanFeedbackMessage.value = 'Formato de código no reconocido.'
+      scanFeedbackType.value = 'error'
+      scanFeedbackModal.value = true
+      return
+    }
+
+    if (!parsed.valid) {
+      scanFeedbackMessage.value = 'Código expirado. Pídele al usuario que actualice su QR.'
+      scanFeedbackType.value = 'error'
+      scanFeedbackModal.value = true
+      return
+    }
+
+    const userId = parsed.uid
+    const userName = await getUserName(userId)
+    const active = await findActiveSession(userId)
+
+    if (active) {
+      await checkOut(userId, active.id, active.checkIn)
+      const dur = Math.round((Date.now() - active.checkIn) / 60000)
+      scanFeedbackMessage.value = `${userName} estuvo entrenando por ${dur} minutos.`
+      scanFeedbackType.value = 'out'
+    } else {
+      await checkIn(userId, userName)
+      scanFeedbackMessage.value = `Bienvenido, ${userName}.`
+      scanFeedbackType.value = 'in'
+    }
+    
+    scanFeedbackModal.value = true
+    await loadTodayRecords()
+    
+    // Auto cerrar el modal después de 4 segundos
+    if (modalTimeout) clearTimeout(modalTimeout)
+    modalTimeout = setTimeout(() => {
+      if (scanFeedbackModal.value) closeScanModal()
+    }, 4000)
+
+  } catch (err) {
+    scanFeedbackMessage.value = `Hubo un error de conexión: ${err.message}`
+    scanFeedbackType.value = 'error'
+    scanFeedbackModal.value = true
+  } finally {
+    scanLoading.value = false
   }
+}
+
+const startScanner = async () => {
+  scannerActive.value = true
+  const { Html5Qrcode } = await import('html5-qrcode')
+  await new Promise(r => setTimeout(r, 100))
+  html5QrCode = new Html5Qrcode('qr-reader')
+  try {
+    await html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      handleScanSuccess,
+      () => {}
+    )
+  } catch (err) {
+    scanFeedback.value = '❌ No se pudo acceder a la cámara.'
+    scanFeedbackType.value = 'error'
+    scannerActive.value = false
+  }
+}
+
+const stopScanner = async () => {
+  if (html5QrCode) {
+    try { await html5QrCode.stop() } catch {}
+    html5QrCode = null
+  }
+  scannerActive.value = false
 }
 
 onMounted(() => {
   fetchTrainers()
   fetchPlans()
+  loadTodayRecords()
 })
+
+onBeforeUnmount(() => { stopScanner() })
 </script>
 
 <style scoped>

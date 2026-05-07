@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { auth } from '../firebase/config'
 
+const ADMIN_EMAIL = 'apps.lifesync@gmail.com'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -20,7 +22,7 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: () => import('../views/AdminView.vue'),
-      meta: { requiresAuth: true } // Por ahora requerirá auth, luego se puede restringir a roles
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
   ]
 })
@@ -28,18 +30,18 @@ const router = createRouter({
 // Guardia de navegación
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
   const currentUser = auth.currentUser
 
   if (requiresAuth && !currentUser) {
-    // A veces currentUser es null al cargar rápido la página, 
-    // lo ideal sería esperar la inicialización de Firebase pero para MVP usamos esto:
     next('/')
-  } else if (!requiresAuth && currentUser && to.path === '/') {
-    // Si ya está logueado y va al home, puede quedarse o ir al panel
-    next()
+  } else if (requiresAdmin && currentUser?.email !== ADMIN_EMAIL) {
+    // Si intenta acceder a admin sin ser admin, redirigir al panel
+    next('/panel')
   } else {
     next()
   }
 })
 
 export default router
+

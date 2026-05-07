@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "firebase": "^12.12.1",
+    "html5-qrcode": "^2.3.8",
     "lucide-vue-next": "^0.470.0",
+    "qrcode.vue": "^3.9.0",
     "vue": "^3.5.32",
     "vue-router": "^4.5.0"
   },

@@ -3,15 +3,15 @@
     <div class="max-w-4xl mx-auto">
       
       <!-- Header del Dashboard -->
-      <div class="bg-slate-800 rounded-2xl p-8 mb-8 border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="bg-slate-800 rounded-2xl p-5 md:p-8 mb-6 md:mb-8 border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
         <div class="flex items-center gap-6">
-          <img v-if="user?.photoURL" :src="user.photoURL" alt="Foto de perfil" class="w-20 h-20 rounded-full border-2 border-lime-400" />
-          <div v-else class="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center border-2 border-lime-400">
-            <span class="text-2xl font-bold text-slate-300">{{ user?.displayName?.charAt(0) || 'U' }}</span>
+          <img v-if="user?.photoURL" :src="user.photoURL" alt="Foto de perfil" class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-lime-400" />
+          <div v-else class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-slate-700 flex items-center justify-center border-2 border-lime-400">
+            <span class="text-xl md:text-2xl font-bold text-slate-300">{{ user?.displayName?.charAt(0) || 'U' }}</span>
           </div>
-          <div>
-            <h1 class="text-3xl font-bold text-white mb-1">Hola, {{ user?.displayName?.split(' ')[0] || 'Atleta' }}</h1>
-            <p class="text-slate-400">Bienvenido a tu panel de entrenamiento.</p>
+          <div class="text-center md:text-left">
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">Hola, {{ user?.displayName?.split(' ')[0] || 'Atleta' }}</h1>
+            <p class="text-sm md:text-base text-slate-400">Bienvenido a tu panel de entrenamiento.</p>
           </div>
         </div>
         <div class="text-center md:text-right">
@@ -24,9 +24,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         <!-- Agendar Citas Form -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-fit">
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700 h-fit">
           <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
             Agendar Entrenamiento
@@ -123,7 +123,7 @@
         </div>
 
         <!-- Próximas Citas -->
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-fit">
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700 h-fit">
           <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Tus Próximas Citas
@@ -158,21 +158,155 @@
         </div>
       </div>
 
+      <!-- QR y Asistencia -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mt-6 md:mt-8">
+        <!-- Mi QR de Acceso -->
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700 flex flex-col items-center">
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2 self-start">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+            Mi QR de Acceso
+          </h2>
+          <div class="bg-white p-4 rounded-xl mb-4 relative cursor-pointer hover:scale-105 transition-transform" @click="isQrEnlarged = true" title="Toca para ampliar">
+            <QRCodeVue3 v-if="user" :value="qrValue" :width="180" :height="180" />
+            <div class="absolute inset-0 bg-black/5 opacity-0 hover:opacity-100 flex items-center justify-center rounded-xl transition-opacity">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-900 drop-shadow-md"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            </div>
+          </div>
+          <button @click="isQrEnlarged = true" class="text-lime-400 text-sm font-bold flex items-center gap-2 hover:text-lime-300 transition-colors mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+            Ampliar QR
+          </button>
+          <p class="text-slate-400 text-sm text-center mt-2">Muestra este QR al ingresar o salir del gimnasio.</p>
+          <div class="mt-2 text-xs text-slate-500 text-center flex items-center gap-1 justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Se renueva en {{ qrCountdown }}
+          </div>
+          <div v-if="activeSession" class="mt-4 w-full bg-lime-400/10 border border-lime-400/30 rounded-xl p-3 text-center">
+            <span class="text-lime-400 font-bold text-sm">🟢 Estás dentro del gimnasio</span>
+          </div>
+          <div v-else class="mt-4 w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-center">
+            <span class="text-slate-500 text-sm">⚪ Fuera del gimnasio</span>
+          </div>
+        </div>
+
+        <!-- Estadísticas de Asistencia -->
+        <div class="bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-700">
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            Mi Asistencia
+          </h2>
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-center">
+              <div class="text-2xl font-black text-lime-400">{{ daysThisMonth }}</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Días este mes</div>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-center">
+              <div class="text-2xl font-black text-lime-400">{{ formatDuration(avgMinutesPerVisit) }}</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Promedio</div>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-center">
+              <div class="text-2xl font-black text-lime-400">{{ formatDuration(totalMinutesThisMonth) }}</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">Total mes</div>
+            </div>
+          </div>
+          <!-- Historial reciente -->
+          <h3 class="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Historial Reciente</h3>
+          <div v-if="attendanceRecords.length === 0" class="text-slate-500 text-center py-6 bg-slate-900/50 rounded-lg border border-slate-700 border-dashed text-sm">
+            Sin registros de asistencia aún.
+          </div>
+          <div v-else class="flex flex-col gap-2 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+            <div v-for="record in attendanceRecords.slice(0, 15)" :key="record.id" class="bg-slate-900 p-3 rounded-xl border border-slate-700 flex items-center justify-between text-sm">
+              <div>
+                <div class="font-semibold text-white">{{ formatDate(record.date) }}</div>
+                <div class="text-xs text-slate-400 mt-0.5">
+                  {{ formatTime(record.checkIn) }} → {{ record.checkOut ? formatTime(record.checkOut) : '...' }}
+                </div>
+              </div>
+              <div class="text-lime-400 font-bold text-xs bg-lime-400/10 px-2 py-1 rounded">
+                {{ record.duration ? formatDuration(record.duration) : '🟢 Activo' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal QR Ampliado (Pantalla Completa) -->
+    <div v-if="isQrEnlarged" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black" @click="isQrEnlarged = false">
+      <div class="flex flex-col items-center w-full px-4" @click.stop>
+        <h3 style="color: white; font-size: 1.5rem; font-weight: 900; margin-bottom: 1.5rem;">Pase de Acceso</h3>
+        
+        <!-- QR grande - ocupa casi todo el ancho de la pantalla -->
+        <div class="qr-enlarged-container">
+          <QRCodeVue3 v-if="user" :value="qrValue" :width="500" :height="500" />
+        </div>
+        
+        <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 1.5rem; margin-bottom: 0.5rem;">Renovación automática en:</p>
+        <p style="color: #a3e635; font-size: 3rem; font-weight: 900; font-family: monospace; margin-bottom: 2rem;">{{ qrCountdown }}</p>
+        
+        <button @click="isQrEnlarged = false" style="width: 100%; max-width: 400px; padding: 1rem; background: #334155; color: white; border: none; border-radius: 0.75rem; font-weight: 700; font-size: 1.125rem; cursor: pointer;">
+          Cerrar
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import { useAppointments } from '../composables/useAppointments'
 import { useTrainers } from '../composables/useTrainers'
 import { useUserProfile } from '../composables/useUserProfile'
+import { useAttendance } from '../composables/useAttendance'
+import { generateQRValue, msUntilNextSlot } from '../utils/dynamicQR'
+import QRCodeVue3 from 'qrcode.vue'
 
 const { user } = useAuth()
 const { appointments, loading: appointmentsLoading, error, scheduleMultipleAppointments, fetchUserAppointments } = useAppointments()
 const { trainers, fetchTrainers, getBookedTimes } = useTrainers()
 const { userProfile, loading: loadingProfile, fetchUserProfile } = useUserProfile()
+const { attendanceRecords, activeSession, daysThisMonth, totalMinutesThisMonth, avgMinutesPerVisit, formatDuration, fetchUserAttendance } = useAttendance()
+
+const isQrEnlarged = ref(false)
+
+const formatTime = (timestamp) => {
+  if (!timestamp) return ''
+  return new Date(timestamp).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+}
+
+// --- QR DINÁMICO ---
+const qrValue = ref('')
+const qrCountdown = ref('')
+let qrTimer = null
+let countdownTimer = null
+
+const refreshQR = () => {
+  if (user.value) qrValue.value = generateQRValue(user.value.uid)
+}
+
+const updateCountdown = () => {
+  const ms = msUntilNextSlot()
+  const mins = Math.floor(ms / 60000)
+  const secs = Math.floor((ms % 60000) / 1000)
+  qrCountdown.value = `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const startQRTimers = () => {
+  refreshQR()
+  updateCountdown()
+  countdownTimer = setInterval(updateCountdown, 1000)
+  // Programar refresh al próximo cambio de slot
+  const scheduleNext = () => {
+    qrTimer = setTimeout(() => {
+      refreshQR()
+      scheduleNext()
+    }, msUntilNextSlot())
+  }
+  scheduleNext()
+}
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(price)
@@ -295,6 +429,8 @@ onMounted(() => {
   if (user.value) {
     fetchUserAppointments(user.value.uid)
     fetchUserProfile(user.value.uid)
+    fetchUserAttendance(user.value.uid)
+    startQRTimers()
   }
 })
 
@@ -302,7 +438,14 @@ watch(user, (newUser) => {
   if (newUser) {
     fetchUserAppointments(newUser.uid)
     fetchUserProfile(newUser.uid)
+    fetchUserAttendance(newUser.uid)
+    startQRTimers()
   }
+})
+
+onBeforeUnmount(() => {
+  if (qrTimer) clearTimeout(qrTimer)
+  if (countdownTimer) clearInterval(countdownTimer)
 })
 </script>
 
@@ -320,5 +463,25 @@ watch(user, (newUser) => {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569; 
+}
+
+/* QR ampliado - escala al 85% del ancho de pantalla */
+.qr-enlarged-container {
+  background: white;
+  padding: 16px;
+  border-radius: 1rem;
+  width: 85vw;
+  max-width: 420px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+.qr-enlarged-container :deep(canvas),
+.qr-enlarged-container :deep(svg),
+.qr-enlarged-container :deep(img) {
+  width: 100% !important;
+  height: 100% !important;
 }
 </style>
