@@ -14,13 +14,44 @@
             <p class="text-sm md:text-base text-slate-400">Bienvenido a tu panel de entrenamiento.</p>
           </div>
         </div>
-        <div class="text-center md:text-right">
+        <div class="text-center md:text-right flex flex-col gap-2 items-center md:items-end">
           <div class="inline-block bg-slate-900 px-4 py-2 rounded-lg border border-slate-700">
             <span class="block text-xs text-slate-400 uppercase tracking-wider mb-1">Plan Actual</span>
             <span class="font-bold" :class="userProfile?.activePlanId ? 'text-lime-400' : 'text-slate-500'">
               {{ userProfile?.activePlanName || 'Ninguno' }}
             </span>
           </div>
+          <!-- Tarjeta de renovación -->
+          <div v-if="renewalInfo" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium"
+               :class="renewalInfo.urgent
+                 ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                 : 'bg-slate-900 border-slate-700 text-slate-400'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            <span>{{ renewalInfo.text }}
+              <strong v-if="renewalInfo.days !== null" :class="renewalInfo.urgent ? 'text-red-300' : 'text-white'">
+                {{ renewalInfo.days }} {{ renewalInfo.days === 1 ? 'día' : 'días' }}
+              </strong>
+              <strong v-else class="text-white">{{ renewalInfo.formattedDate }}</strong>
+            </span>
+          </div>
+
+          <!-- Tarjeta de plan en cola -->
+          <div v-if="userProfile?.queuedPlan" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium bg-blue-500/10 border-blue-500/30 text-blue-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Próximo: <strong>{{ userProfile.queuedPlan.name }}</strong> (Inicia al expirar el actual)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta de Plan Deprecado -->
+      <div v-if="isPlanDeprecated" class="mb-6 md:mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 md:p-6 flex items-start gap-4 animate-fade-in">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 flex-shrink-0 mt-0.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+        <div>
+          <h3 class="text-amber-400 font-bold mb-1">Tu plan actual ya no está disponible en el catálogo</h3>
+          <p class="text-slate-300 text-sm mb-3">Seguirás disfrutando de sus beneficios hasta que se agoten tus días vigentes. Te recomendamos seleccionar un plan nuevo ahora; no perderás tus días actuales, el nuevo plan se pondrá en espera y se activará automáticamente cuando el actual finalice.</p>
+          <button @click="router.push('/#planes')" class="text-xs font-bold text-slate-900 bg-amber-500 px-4 py-2 rounded-lg hover:bg-amber-400 transition-colors">
+            Ver nuevos planes
+          </button>
         </div>
       </div>
 
@@ -92,7 +123,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Fecha</label>
-                    <input type="date" v-model="session.date" @change="handleDateChange(index)" :min="today" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-lime-400 transition-colors" />
+                    <input type="date" v-model="session.date" @change="handleDateChange(index)" :min="minDate" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-lime-400 transition-colors" />
                   </div>
                   <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">Hora</label>
@@ -256,19 +287,59 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useAppointments } from '../composables/useAppointments'
 import { useTrainers } from '../composables/useTrainers'
-import { useUserProfile } from '../composables/useUserProfile'
+import { useUserProfile, calculateExpirationDate } from '../composables/useUserProfile'
 import { useAttendance } from '../composables/useAttendance'
+import { usePlans } from '../composables/usePlans'
 import { generateQRValue, msUntilNextSlot } from '../utils/dynamicQR'
 import QRCodeVue3 from 'qrcode.vue'
 
+const router = useRouter()
 const { user } = useAuth()
 const { appointments, loading: appointmentsLoading, error, scheduleMultipleAppointments, fetchUserAppointments } = useAppointments()
 const { trainers, fetchTrainers, getBookedTimes } = useTrainers()
-const { userProfile, loading: loadingProfile, fetchUserProfile } = useUserProfile()
+const { userProfile, loading: loadingProfile, fetchUserProfile, checkAndPromotePlan } = useUserProfile()
 const { attendanceRecords, activeSession, daysThisMonth, totalMinutesThisMonth, avgMinutesPerVisit, formatDuration, fetchUserAttendance } = useAttendance()
+const { plans, fetchPlans, loading: plansLoading } = usePlans()
+
+// --- PLAN DEPRECADO ---
+const isPlanDeprecated = computed(() => {
+  if (!userProfile.value?.activePlanId) return false
+  if (plansLoading.value || !plans.value) return false 
+  return plans.value.length > 0 && !plans.value.find(p => p.id === userProfile.value.activePlanId)
+})
+
+// --- RENOVACIÓN DE SUSCRIPCIÓN ---
+const renewalInfo = computed(() => {
+  if (!userProfile.value?.activePlanId) return null
+
+  // Usar fecha de suscripción explícita, o la de última actualización (para usuarios antiguos)
+  const startDateMs = userProfile.value.subscribedAt || userProfile.value.updatedAt || Date.now()
+  const expiresAt = calculateExpirationDate(startDateMs, userProfile.value.activePlanPeriod)
+  const renewal = new Date(expiresAt)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  renewal.setHours(0, 0, 0, 0)
+
+  const diffMs = renewal - today
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+  const formattedDate = renewal.toLocaleDateString('es-ES', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  })
+
+  if (diffDays <= 0) {
+    return { text: 'Tu suscripción vence hoy', days: 0, urgent: true, formattedDate }
+  } else if (diffDays <= 32) {
+    return { text: `Tu suscripción se renueva en`, days: diffDays, urgent: diffDays <= 7, formattedDate }
+  } else {
+    return { text: `Tu suscripción se renueva el`, days: null, urgent: false, formattedDate }
+  }
+})
 
 const isQrEnlarged = ref(false)
 
@@ -351,7 +422,9 @@ const generateDynamicTimes = (start, end) => {
   trainerDynamicTimes.value = times
 }
 
-const today = new Date().toISOString().split('T')[0]
+const tomorrow = new Date()
+tomorrow.setDate(tomorrow.getDate() + 1)
+const minDate = tomorrow.toISOString().split('T')[0]
 
 // Escuchar cambios en la cantidad de sesiones para ajustar el formulario dinámicamente
 watch(numSessions, (newVal) => {
@@ -424,9 +497,11 @@ const handleSchedule = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   fetchTrainers()
+  fetchPlans()
   if (user.value) {
+    await checkAndPromotePlan(user.value.uid)
     fetchUserAppointments(user.value.uid)
     fetchUserProfile(user.value.uid)
     fetchUserAttendance(user.value.uid)
@@ -434,8 +509,9 @@ onMounted(() => {
   }
 })
 
-watch(user, (newUser) => {
+watch(user, async (newUser) => {
   if (newUser) {
+    await checkAndPromotePlan(newUser.uid)
     fetchUserAppointments(newUser.uid)
     fetchUserProfile(newUser.uid)
     fetchUserAttendance(newUser.uid)

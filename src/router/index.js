@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { auth } from '../firebase/config'
 
-const ADMIN_EMAIL = 'apps.lifesync@gmail.com'
+const ADMIN_EMAILS = ['apps.lifesync@gmail.com', 'adminirongym@gmail.com']
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,7 +35,7 @@ router.beforeEach((to, from, next) => {
 
   if (requiresAuth && !currentUser) {
     next('/')
-  } else if (requiresAdmin && currentUser?.email !== ADMIN_EMAIL) {
+  } else if (requiresAdmin && !ADMIN_EMAILS.includes(currentUser?.email)) {
     // Si intenta acceder a admin sin ser admin, redirigir al panel
     next('/panel')
   } else {

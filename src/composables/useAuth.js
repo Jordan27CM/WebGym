@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { auth, googleProvider } from '../firebase/config'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 
-const ADMIN_EMAIL = 'apps.lifesync@gmail.com'
+const ADMIN_EMAILS = ['apps.lifesync@gmail.com', 'adminirongym@gmail.com']
 
 export function useAuth() {
   const user = ref(null)
@@ -17,7 +17,7 @@ export function useAuth() {
 
   // Computed: ¿es admin?
   const isAdmin = computed(() => {
-    return user.value?.email === ADMIN_EMAIL
+    return ADMIN_EMAILS.includes(user.value?.email)
   })
 
   const loginWithGoogle = async () => {

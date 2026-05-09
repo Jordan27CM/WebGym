@@ -17,11 +17,11 @@
         No hay planes disponibles por el momento.
       </div>
       
-      <!-- Contenedor con scroll horizontal -->
-      <div v-else class="flex gap-4 overflow-x-auto pb-8 pt-4 snap-x snap-mandatory custom-scrollbar md:justify-center">
+      <!-- Contenedor flex con wrap -->
+      <div v-else class="flex flex-wrap justify-center gap-6 pb-8 pt-4">
         <!-- Tarjeta dinámica de Plan -->
         <div v-for="plan in plans" :key="plan.id" 
-             class="relative bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 flex flex-col flex-shrink-0 w-[260px] snap-center group"
+             class="relative bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 flex flex-col w-full max-w-[280px] group"
              :class="plan.isPopular ? 'border-lime-400 shadow-[0_0_20px_rgba(202,255,0,0.1)]' : 'border-slate-700/50 hover:border-slate-500'">
           
           <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-lime-400 text-slate-900 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
@@ -53,6 +53,27 @@
         </div>
       </div>
 
+      <!-- Modal Simulación de Pago -->
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-sm w-full text-center border border-slate-700 shadow-2xl">
+          <div v-if="paymentStatus === 'processing'" class="flex flex-col items-center">
+            <svg class="animate-spin h-12 w-12 text-lime-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <h3 class="text-xl font-bold text-white mb-2">Simulación de Pago</h3>
+            <p class="text-slate-400 text-sm">Procesando tu suscripción de forma segura...</p>
+          </div>
+          <div v-else-if="paymentStatus === 'approved'" class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-lime-400 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(202,255,0,0.4)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">¡Pago Aprobado!</h3>
+            <p class="text-slate-400 text-sm">Suscripción activada con éxito.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </template>
@@ -70,6 +91,8 @@ const { user, loginWithGoogle } = useAuth()
 const { updateUserPlan } = useUserProfile()
 
 const purchasing = ref(null)
+const showModal = ref(false)
+const paymentStatus = ref('processing')
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-CL', {
@@ -91,12 +114,28 @@ const handlePurchase = async (plan) => {
     }
     
     if (currentUser) {
-      await updateUserPlan(currentUser.uid, currentUser.displayName || 'Atleta', plan.id, plan.name)
+      // 1. Mostrar simulación de pago
+      showModal.value = true
+      paymentStatus.value = 'processing'
+      
+      // 2. Esperar 5 segundos (Ruedita cargando)
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      
+      // 3. Mostrar pago aprobado
+      paymentStatus.value = 'approved'
+      
+      // 4. Esperar un poco para que el usuario lea el mensaje
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // 5. Ocultar modal y activar suscripción real
+      showModal.value = false
+      await updateUserPlan(currentUser.uid, currentUser.displayName || 'Atleta', plan.id, plan.name, plan.period)
       router.push('/panel')
     }
   } catch (error) {
     console.error("Error en la compra simulada:", error)
     alert("Hubo un problema al procesar tu plan.")
+    showModal.value = false
   } finally {
     purchasing.value = null
   }

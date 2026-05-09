@@ -33,9 +33,44 @@ export function useTrainers() {
   // Función para eliminar un entrenador (Solo Admin)
   const deleteTrainer = async (trainerId) => {
     try {
+      // 1. Obtener todas las citas de este entrenador para saber qué usuarios están afectados
+      const trainerAppointmentsRef = dbRef(db, `trainer_appointments/${trainerId}`)
+      const snapshot = await get(trainerAppointmentsRef)
+      
+      const userIds = new Set()
+      if (snapshot.exists()) {
+        const datesData = snapshot.val()
+        for (const date in datesData) {
+          const times = datesData[date]
+          for (const time in times) {
+            userIds.add(times[time])
+          }
+        }
+      }
+
+      // 2. Limpiar las citas en el perfil de cada usuario afectado
+      for (const userId of userIds) {
+        const userAppRef = dbRef(db, `appointments/${userId}`)
+        const userSnap = await get(userAppRef)
+        
+        if (userSnap.exists()) {
+          const userApps = userSnap.val()
+          for (const appId in userApps) {
+            if (userApps[appId].trainerId === trainerId) {
+              await remove(dbRef(db, `appointments/${userId}/${appId}`))
+            }
+          }
+        }
+      }
+
+      // 3. Eliminar el índice de citas del entrenador
+      await remove(trainerAppointmentsRef)
+
+      // 4. Eliminar el perfil del entrenador
       const trainerRef = dbRef(db, `trainers/${trainerId}`)
       await remove(trainerRef)
     } catch (err) {
+      console.error("Error al eliminar entrenador y sus citas:", err)
       throw err
     }
   }

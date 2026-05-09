@@ -44,7 +44,8 @@ export function useAttendance() {
       loading.value = true
       const now = Date.now()
       const durationMs = now - checkInTime
-      const durationMinutes = Math.round(durationMs / 60000)
+      // Mínimo 1 minuto para evitar que duration=0 sea tratado como falsy
+      const durationMinutes = Math.max(1, Math.round(durationMs / 60000))
 
       const recordRef = dbRef(db, `attendance/${userId}/${attendanceId}`)
       await update(recordRef, {
@@ -166,13 +167,13 @@ export function useAttendance() {
   // Tiempo total en minutos este mes (solo sesiones cerradas)
   const totalMinutesThisMonth = computed(() => {
     return currentMonthRecords.value
-      .filter(r => r.duration) // Solo registros con duración
+      .filter(r => r.duration != null) // Solo registros con duración (!=null cubre el 0)
       .reduce((sum, r) => sum + r.duration, 0)
   })
 
   // Tiempo promedio por visita en minutos
   const avgMinutesPerVisit = computed(() => {
-    const closed = currentMonthRecords.value.filter(r => r.duration)
+    const closed = currentMonthRecords.value.filter(r => r.duration != null)
     if (closed.length === 0) return 0
     const total = closed.reduce((sum, r) => sum + r.duration, 0)
     return Math.round(total / closed.length)
