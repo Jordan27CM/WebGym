@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { db } from '../firebase/config'
-import { ref as dbRef, push, set, remove, onValue, get } from 'firebase/database'
+import { ref as dbRef, push, set, remove, onValue, get, update } from 'firebase/database'
 
 export function useTrainers() {
   const trainers = ref([])
@@ -75,6 +75,26 @@ export function useTrainers() {
     }
   }
 
+  // Función para actualizar un entrenador (Solo Admin)
+  const updateTrainer = async (trainerId, trainerData) => {
+    try {
+      const trainerRef = dbRef(db, `trainers/${trainerId}`)
+      const payload = {
+        name: trainerData.name,
+        specialty: trainerData.specialty,
+        photoUrl: trainerData.photoUrl || '',
+        startTime: trainerData.startTime || '08:00',
+        endTime: trainerData.endTime || '18:00',
+        sessionPrice: trainerData.sessionPrice || 0,
+        updatedAt: Date.now()
+      }
+      await update(trainerRef, payload)
+      return payload
+    } catch (err) {
+      throw err
+    }
+  }
+
   // Escuchar lista de entrenadores
   const fetchTrainers = () => {
     loading.value = true
@@ -121,6 +141,7 @@ export function useTrainers() {
     trainers,
     loading,
     addTrainer,
+    updateTrainer,
     deleteTrainer,
     fetchTrainers,
     getBookedTimes

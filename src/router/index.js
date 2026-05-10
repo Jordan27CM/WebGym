@@ -24,7 +24,19 @@ const router = createRouter({
       component: () => import('../views/AdminView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true }
     }
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth'
+      }
+    }
+    if (savedPosition) {
+      return savedPosition
+    }
+    return { top: 0 }
+  }
 })
 
 // Guardia de navegación

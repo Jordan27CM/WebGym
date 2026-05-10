@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { db } from '../firebase/config'
-import { ref as dbRef, push, set, remove, onValue } from 'firebase/database'
+import { ref as dbRef, push, set, remove, onValue, update } from 'firebase/database'
 
 export function usePlans() {
   const plans = ref([])
@@ -40,6 +40,28 @@ export function usePlans() {
     }
   }
 
+  // Actualizar un plan (Admin)
+  const updatePlan = async (planId, planData) => {
+    try {
+      const planRef = dbRef(db, `plans/${planId}`)
+      const payload = {
+        name: planData.name,
+        price: planData.price,
+        period: planData.period,
+        description: planData.description,
+        features: typeof planData.features === 'string' 
+          ? planData.features.split(',').map(f => f.trim()).filter(f => f)
+          : planData.features,
+        isPopular: planData.isPopular || false,
+        updatedAt: Date.now()
+      }
+      await update(planRef, payload)
+      return payload
+    } catch (err) {
+      throw err
+    }
+  }
+
   // Escuchar lista de planes
   const fetchPlans = () => {
     loading.value = true
@@ -67,6 +89,7 @@ export function usePlans() {
     plans,
     loading,
     addPlan,
+    updatePlan,
     deletePlan,
     fetchPlans
   }

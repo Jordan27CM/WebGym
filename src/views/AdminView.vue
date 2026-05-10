@@ -150,9 +150,14 @@
                   </div>
                 </div>
               </div>
-              <button @click="handleDeleteTrainer(trainer.id)" class="text-slate-500 hover:text-red-400 transition-colors" title="Eliminar entrenador">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-              </button>
+              <div class="flex items-center gap-2">
+                <button @click="openEditTrainerModal(trainer)" class="text-slate-500 hover:text-blue-400 transition-colors" title="Editar entrenador">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </button>
+                <button @click="handleDeleteTrainer(trainer.id)" class="text-slate-500 hover:text-red-400 transition-colors" title="Eliminar entrenador">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -229,9 +234,14 @@
                   <h4 class="font-bold text-lg text-white">{{ plan.name }}</h4>
                   <div class="text-2xl font-black text-white mt-1">{{ formatPrice(plan.price) }} <span class="text-sm font-normal text-slate-400">/ {{ plan.period }}</span></div>
                 </div>
-                <button @click="handleDeletePlan(plan.id)" class="text-slate-500 hover:text-red-400 transition-colors mt-1" title="Eliminar plan">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                </button>
+                <div class="flex items-center gap-2 mt-1">
+                  <button @click="openEditPlanModal(plan)" class="text-slate-500 hover:text-blue-400 transition-colors" title="Editar plan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </button>
+                  <button @click="handleDeletePlan(plan.id)" class="text-slate-500 hover:text-red-400 transition-colors" title="Eliminar plan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  </button>
+                </div>
               </div>
               
               <p class="text-sm text-slate-400 mb-3">{{ plan.description }}</p>
@@ -246,8 +256,106 @@
           </div>
         </div>
       </div>
+      <!-- MODAL DE EDICIÓN DE ENTRENADOR -->
+      <div v-if="isEditingTrainer" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <button @click="closeEditTrainerModal" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          
+          <h3 class="text-xl font-bold text-white mb-6">Editar Entrenador</h3>
+          
+          <form @submit.prevent="handleUpdateTrainer" class="flex flex-col gap-4 text-left">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Nombre</label>
+              <input type="text" v-model="editTrainerData.name" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Especialidad</label>
+              <input type="text" v-model="editTrainerData.specialty" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">URL de la Foto</label>
+              <input type="url" v-model="editTrainerData.photoUrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Precio por Sesión (CLP)</label>
+              <input type="number" step="1" v-model="editTrainerData.sessionPrice" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
 
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Hora Inicio Turno</label>
+                <input type="time" v-model="editTrainerData.startTime" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Hora Fin Turno</label>
+                <input type="time" v-model="editTrainerData.endTime" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+              </div>
+            </div>
+            
+            <button type="submit" :disabled="loadingEditTrainer" class="mt-4 w-full bg-lime-400 text-slate-900 py-3 rounded-lg font-bold hover:bg-lime-500 transition-colors disabled:opacity-50">
+              {{ loadingEditTrainer ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+            <p v-if="successMsgEditTrainer" class="text-lime-400 text-sm font-medium mt-1">{{ successMsgEditTrainer }}</p>
+            <p v-if="errorMsgEditTrainer" class="text-red-400 text-sm font-medium mt-1">{{ errorMsgEditTrainer }}</p>
+          </form>
+        </div>
+      </div>
 
+      <!-- MODAL DE EDICIÓN DE PLAN -->
+      <div v-if="isEditingPlan" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <button @click="closeEditPlanModal" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          
+          <h3 class="text-xl font-bold text-white mb-6">Editar Plan</h3>
+          
+          <form @submit.prevent="handleUpdatePlan" class="flex flex-col gap-4 text-left">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Nombre del Plan</label>
+              <input type="text" v-model="editPlanData.name" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Precio (CLP)</label>
+                <input type="number" step="1" v-model="editPlanData.price" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Periodo</label>
+                <select v-model="editPlanData.period" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors">
+                  <option value="mes">Mensual</option>
+                  <option value="año">Anual</option>
+                  <option value="semana">Semanal</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Descripción corta</label>
+              <input type="text" v-model="editPlanData.description" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Características (Separadas por comas)</label>
+              <textarea v-model="editPlanData.features" required rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400 transition-colors"></textarea>
+            </div>
+
+            <label class="flex items-center gap-3 cursor-pointer mt-2">
+              <input type="checkbox" v-model="editPlanData.isPopular" class="w-5 h-5 accent-lime-400 bg-slate-900 border-slate-700 rounded" />
+              <span class="text-sm font-medium text-slate-300">Marcar como Plan Destacado / Popular</span>
+            </label>
+            
+            <button type="submit" :disabled="loadingEditPlan" class="mt-4 w-full bg-lime-400 text-slate-900 py-3 rounded-lg font-bold hover:bg-lime-500 transition-colors disabled:opacity-50">
+              {{ loadingEditPlan ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+            <p v-if="successMsgEditPlan" class="text-lime-400 text-sm font-medium mt-1">{{ successMsgEditPlan }}</p>
+            <p v-if="errorMsgEditPlan" class="text-red-400 text-sm font-medium mt-1">{{ errorMsgEditPlan }}</p>
+          </form>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -272,11 +380,18 @@ const formatTimestamp = (ts) => {
 }
 
 // --- ENTRENADORES ---
-const { addTrainer, deleteTrainer, fetchTrainers, trainers, loading: loadingTrainers } = useTrainers()
+const { addTrainer, updateTrainer, deleteTrainer, fetchTrainers, trainers, loading: loadingTrainers } = useTrainers()
 const newTrainer = ref({ name: '', specialty: '', photoUrl: '', startTime: '08:00', endTime: '18:00', sessionPrice: '' })
 const loadingTrainer = ref(false)
 const successMsgTrainer = ref('')
 const errorMsgTrainer = ref('')
+
+const isEditingTrainer = ref(false)
+const currentEditTrainerId = ref(null)
+const editTrainerData = ref({ name: '', specialty: '', photoUrl: '', startTime: '08:00', endTime: '18:00', sessionPrice: 0 })
+const loadingEditTrainer = ref(false)
+const errorMsgEditTrainer = ref('')
+const successMsgEditTrainer = ref('')
 
 const handleAddTrainer = async () => {
   loadingTrainer.value = true; successMsgTrainer.value = ''; errorMsgTrainer.value = ''
@@ -292,12 +407,55 @@ const handleDeleteTrainer = async (id) => {
   if (confirm('¿Seguro que deseas eliminar este entrenador?')) await deleteTrainer(id)
 }
 
+const openEditTrainerModal = (trainer) => {
+  isEditingTrainer.value = true
+  currentEditTrainerId.value = trainer.id
+  editTrainerData.value = {
+    name: trainer.name,
+    specialty: trainer.specialty,
+    photoUrl: trainer.photoUrl || '',
+    startTime: trainer.startTime || '08:00',
+    endTime: trainer.endTime || '18:00',
+    sessionPrice: trainer.sessionPrice || 0
+  }
+  errorMsgEditTrainer.value = ''
+  successMsgEditTrainer.value = ''
+}
+
+const closeEditTrainerModal = () => {
+  isEditingTrainer.value = false
+}
+
+const handleUpdateTrainer = async () => {
+  loadingEditTrainer.value = true
+  errorMsgEditTrainer.value = ''
+  successMsgEditTrainer.value = ''
+  try {
+    await updateTrainer(currentEditTrainerId.value, editTrainerData.value)
+    successMsgEditTrainer.value = 'Entrenador actualizado exitosamente.'
+    setTimeout(() => {
+      isEditingTrainer.value = false
+    }, 1500)
+  } catch (error) {
+    errorMsgEditTrainer.value = 'Error al actualizar: ' + error.message
+  } finally {
+    loadingEditTrainer.value = false
+  }
+}
+
 // --- PLANES ---
-const { addPlan, deletePlan, fetchPlans, plans, loading: loadingPlans } = usePlans()
+const { addPlan, updatePlan, deletePlan, fetchPlans, plans, loading: loadingPlans } = usePlans()
 const newPlan = ref({ name: '', price: '', period: 'mes', description: '', features: '', isPopular: false })
 const loadingPlan = ref(false)
 const successMsgPlan = ref('')
 const errorMsgPlan = ref('')
+
+const isEditingPlan = ref(false)
+const currentEditPlanId = ref(null)
+const editPlanData = ref({ name: '', price: 0, period: 'mes', description: '', features: '', isPopular: false })
+const loadingEditPlan = ref(false)
+const errorMsgEditPlan = ref('')
+const successMsgEditPlan = ref('')
 
 const handleAddPlan = async () => {
   loadingPlan.value = true; successMsgPlan.value = ''; errorMsgPlan.value = ''
@@ -305,12 +463,48 @@ const handleAddPlan = async () => {
     await addPlan(newPlan.value)
     successMsgPlan.value = 'Plan guardado exitosamente.'
     newPlan.value = { name: '', price: '', period: 'mes', description: '', features: '', isPopular: false }
-  } catch (error) { errorMsgPlan.value = 'Ocurrió un error.' }
+  } catch (error) { errorMsgPlan.value = 'Ocurrió un error al guardar.' }
   finally { loadingPlan.value = false }
 }
 
 const handleDeletePlan = async (id) => {
   if (confirm('¿Seguro que deseas eliminar este plan?')) await deletePlan(id)
+}
+
+const openEditPlanModal = (plan) => {
+  isEditingPlan.value = true
+  currentEditPlanId.value = plan.id
+  editPlanData.value = {
+    name: plan.name,
+    price: plan.price,
+    period: plan.period,
+    description: plan.description,
+    features: Array.isArray(plan.features) ? plan.features.join(', ') : '',
+    isPopular: plan.isPopular || false
+  }
+  errorMsgEditPlan.value = ''
+  successMsgEditPlan.value = ''
+}
+
+const closeEditPlanModal = () => {
+  isEditingPlan.value = false
+}
+
+const handleUpdatePlan = async () => {
+  loadingEditPlan.value = true
+  errorMsgEditPlan.value = ''
+  successMsgEditPlan.value = ''
+  try {
+    await updatePlan(currentEditPlanId.value, editPlanData.value)
+    successMsgEditPlan.value = 'Plan actualizado exitosamente.'
+    setTimeout(() => {
+      isEditingPlan.value = false
+    }, 1500)
+  } catch (error) {
+    errorMsgEditPlan.value = 'Error al actualizar: ' + error.message
+  } finally {
+    loadingEditPlan.value = false
+  }
 }
 
 // --- ASISTENCIA ---

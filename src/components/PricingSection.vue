@@ -71,6 +71,35 @@
             <h3 class="text-xl font-bold text-white mb-2">¡Pago Aprobado!</h3>
             <p class="text-slate-400 text-sm">Suscripción activada con éxito.</p>
           </div>
+          <div v-else-if="paymentStatus === 'queued'" class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-blue-400 rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(96,165,250,0.4)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">¡Plan en Cola!</h3>
+            <p class="text-slate-400 text-sm mt-2 leading-relaxed">Podrás seguir usando tu plan actual hasta la fecha de renovación. El nuevo plan se activará automáticamente al finalizar el actual.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Confirmación de Cambio de Plan -->
+      <div v-if="showConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-800 rounded-2xl p-6 md:p-8 max-w-md w-full text-center border border-slate-700 shadow-2xl relative">
+          <div class="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Cambio de Plan</h3>
+          <p class="text-slate-300 mb-6 text-sm">
+            Ya tienes el siguiente plan: <span class="font-bold text-lime-400">{{ userProfile?.activePlanName }}</span>.<br><br>
+            ¿Estás seguro que quieres cambiar a <span class="font-bold text-white">{{ pendingPlan?.name }}</span>?
+          </p>
+          <div class="flex gap-3 mt-4">
+            <button @click="cancelChangePlan" class="flex-1 py-3 bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-600 transition-colors">
+              Cancelar
+            </button>
+            <button @click="confirmChangePlan" class="flex-1 py-3 bg-lime-400 text-slate-900 rounded-xl font-bold hover:bg-lime-500 transition-colors shadow-[0_0_15px_rgba(202,255,0,0.2)]">
+              Confirmar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -79,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePlans } from '../composables/usePlans'
 import { useAuth } from '../composables/useAuth'
@@ -88,11 +117,20 @@ import { useUserProfile } from '../composables/useUserProfile'
 const router = useRouter()
 const { fetchPlans, plans, loading } = usePlans()
 const { user, loginWithGoogle } = useAuth()
-const { updateUserPlan } = useUserProfile()
+const { updateUserPlan, fetchUserProfile, userProfile } = useUserProfile()
+
+watch(user, (newVal) => {
+  if (newVal) {
+    fetchUserProfile(newVal.uid)
+  }
+}, { immediate: true })
 
 const purchasing = ref(null)
 const showModal = ref(false)
 const paymentStatus = ref('processing')
+
+const showConfirmModal = ref(false)
+const pendingPlan = ref(null)
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-CL', {
@@ -103,7 +141,6 @@ const formatPrice = (price) => {
 }
 
 const handlePurchase = async (plan) => {
-  purchasing.value = plan.id
   try {
     let currentUser = user.value
     // Si no está logueado, forzar login
@@ -114,24 +151,53 @@ const handlePurchase = async (plan) => {
     }
     
     if (currentUser) {
-      // 1. Mostrar simulación de pago
-      showModal.value = true
-      paymentStatus.value = 'processing'
+      // Verificar si ya tiene un plan activo
+      if (userProfile.value && userProfile.value.activePlanId && userProfile.value.activePlanName !== 'Ninguno') {
+        pendingPlan.value = plan
+        showConfirmModal.value = true
+        return
+      }
       
-      // 2. Esperar 5 segundos (Ruedita cargando)
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      
-      // 3. Mostrar pago aprobado
-      paymentStatus.value = 'approved'
-      
-      // 4. Esperar un poco para que el usuario lea el mensaje
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // 5. Ocultar modal y activar suscripción real
-      showModal.value = false
-      await updateUserPlan(currentUser.uid, currentUser.displayName || 'Atleta', plan.id, plan.name, plan.period)
-      router.push('/panel')
+      await processPayment(plan, currentUser, false)
     }
+  } catch (error) {
+    console.error("Error al iniciar la compra:", error)
+    alert("Hubo un problema al procesar tu solicitud.")
+  }
+}
+
+const confirmChangePlan = async () => {
+  showConfirmModal.value = false
+  if (pendingPlan.value && user.value) {
+    await processPayment(pendingPlan.value, user.value, true)
+  }
+  pendingPlan.value = null
+}
+
+const cancelChangePlan = () => {
+  showConfirmModal.value = false
+  pendingPlan.value = null
+}
+
+const processPayment = async (plan, currentUser, isQueued) => {
+  purchasing.value = plan.id
+  try {
+    showModal.value = true
+    paymentStatus.value = 'processing'
+    
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    
+    if (isQueued) {
+      paymentStatus.value = 'queued'
+      await new Promise(resolve => setTimeout(resolve, 4500))
+    } else {
+      paymentStatus.value = 'approved'
+      await new Promise(resolve => setTimeout(resolve, 1500))
+    }
+    
+    showModal.value = false
+    await updateUserPlan(currentUser.uid, currentUser.displayName || 'Atleta', plan.id, plan.name, plan.period)
+    router.push('/panel')
   } catch (error) {
     console.error("Error en la compra simulada:", error)
     alert("Hubo un problema al procesar tu plan.")
