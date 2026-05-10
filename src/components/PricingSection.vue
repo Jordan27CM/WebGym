@@ -18,37 +18,45 @@
       </div>
       
       <!-- Contenedor flex con wrap -->
-      <div v-else class="flex flex-wrap justify-center gap-6 pb-8 pt-4">
-        <!-- Tarjeta dinámica de Plan -->
-        <div v-for="plan in plans" :key="plan.id" 
-             class="relative bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 flex flex-col w-full max-w-[280px] group"
-             :class="plan.isPopular ? 'border-lime-400 shadow-[0_0_20px_rgba(202,255,0,0.1)]' : 'border-slate-700/50 hover:border-slate-500'">
-          
-          <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-lime-400 text-slate-900 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
-            Recomendado
+      <div v-else>
+        <div class="flex flex-wrap justify-center gap-6 pb-8 pt-4">
+          <!-- Tarjeta dinámica de Plan -->
+          <div v-for="plan in displayedPlans" :key="plan.id" 
+               class="relative bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 flex flex-col w-full max-w-[280px] group"
+               :class="plan.isPopular ? 'border-lime-400 shadow-[0_0_20px_rgba(202,255,0,0.1)]' : 'border-slate-700/50 hover:border-slate-500'">
+            
+            <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-lime-400 text-slate-900 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
+              Recomendado
+            </div>
+
+            <div class="mb-5 text-center">
+              <h3 class="text-lg font-bold text-white mb-1">{{ plan.name }}</h3>
+              <p class="text-slate-400 text-xs h-8 line-clamp-2 px-2">{{ plan.description }}</p>
+            </div>
+
+            <div class="mb-6 text-center bg-slate-900/50 py-3 rounded-xl border border-slate-700/50">
+              <span class="text-3xl font-black text-white">{{ formatPrice(plan.price) }}</span>
+              <span class="text-slate-400 text-xs block mt-1">/ {{ plan.period }}</span>
+            </div>
+
+            <ul class="space-y-2 mb-6 flex-1">
+              <li v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-2 bg-slate-900/30 p-2.5 rounded-lg border border-slate-800/50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400 flex-shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="text-slate-300 text-xs leading-tight">{{ feature }}</span>
+              </li>
+            </ul>
+
+            <button @click="handlePurchase(plan)"
+                    :class="['w-full py-2.5 rounded-lg text-sm font-bold transition-all mt-auto', 
+                           plan.isPopular ? 'bg-lime-400 text-slate-900 hover:bg-lime-500 hover:shadow-[0_0_15px_rgba(202,255,0,0.3)]' : 'bg-slate-700 text-white hover:bg-slate-600']">
+              {{ purchasing === plan.id ? 'Procesando...' : 'Comenzar Ahora' }}
+            </button>
           </div>
+        </div>
 
-          <div class="mb-5 text-center">
-            <h3 class="text-lg font-bold text-white mb-1">{{ plan.name }}</h3>
-            <p class="text-slate-400 text-xs h-8 line-clamp-2 px-2">{{ plan.description }}</p>
-          </div>
-
-          <div class="mb-6 text-center bg-slate-900/50 py-3 rounded-xl border border-slate-700/50">
-            <span class="text-3xl font-black text-white">{{ formatPrice(plan.price) }}</span>
-            <span class="text-slate-400 text-xs block mt-1">/ {{ plan.period }}</span>
-          </div>
-
-          <ul class="space-y-2 mb-6 flex-1">
-            <li v-for="(feature, idx) in plan.features" :key="idx" class="flex items-start gap-2 bg-slate-900/30 p-2.5 rounded-lg border border-slate-800/50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-lime-400 flex-shrink-0 mt-0.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span class="text-slate-300 text-xs leading-tight">{{ feature }}</span>
-            </li>
-          </ul>
-
-          <button @click="handlePurchase(plan)"
-                  :class="['w-full py-2.5 rounded-lg text-sm font-bold transition-all mt-auto', 
-                         plan.isPopular ? 'bg-lime-400 text-slate-900 hover:bg-lime-500 hover:shadow-[0_0_15px_rgba(202,255,0,0.3)]' : 'bg-slate-700 text-white hover:bg-slate-600']">
-            {{ purchasing === plan.id ? 'Procesando...' : 'Comenzar Ahora' }}
+        <div v-if="plans.length > 3" class="text-center mt-4 mb-4">
+          <button @click="showAllPlans = !showAllPlans" class="bg-slate-800 text-lime-400 border border-lime-400/30 px-6 py-2 rounded-full font-bold hover:bg-lime-400 hover:text-slate-900 transition-colors">
+            {{ showAllPlans ? 'Ver menos' : 'Ver más planes' }}
           </button>
         </div>
       </div>
@@ -108,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePlans } from '../composables/usePlans'
 import { useAuth } from '../composables/useAuth'
@@ -131,6 +139,19 @@ const paymentStatus = ref('processing')
 
 const showConfirmModal = ref(false)
 const pendingPlan = ref(null)
+
+const showAllPlans = ref(false)
+
+const displayedPlans = computed(() => {
+  const sorted = [...plans.value].sort((a, b) => {
+    if (a.isPopular && !b.isPopular) return -1
+    if (!a.isPopular && b.isPopular) return 1
+    return a.price - b.price
+  })
+  
+  if (showAllPlans.value) return sorted
+  return sorted.slice(0, 3)
+})
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('es-CL', {
